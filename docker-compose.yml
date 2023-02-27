@@ -1,0 +1,103 @@
+version: "3.3"
+services:
+  # Spring Boot application
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - elasticsearch
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    environment:
+      - bootstrap.memory_lock=true
+      - cluster.name=docker-cluster
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      interval: 30s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq ""status":"red""
+
+  # MongoDB
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+
+  # nginx
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+
+  # Telegraf
+  telegraf:
+    image: telegraf
+    volumes:
+      - ./configs/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - "8125:8125/udp"
+    depends_on:
+      - influxdb
+      - backend
+      - mongodb
+      - nginx
+      - socket-proxy
+
+  # InfluxDB
+  influxdb:
+    image: influxdb:1.8-alpine
+    container_name: influxdb
+    restart: always
+    environment:
+      - INFLUXDB_DB=influx
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin
+    ports:
+      - '8086:8086'
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  # Grafana
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    restart: always
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-simple-json-datasource
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: socket-proxy
+    restart: always
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - '2375:2375'
+    environment:
+      - LOG_LEVEL=debug
+      - CONTAINERS=1
+      - INFO=1
+
+volumes:
+  influxdb_data: {}
+  elastic_data: {}
