@@ -122,5 +122,7 @@ Percentage of the requests served within a certain time (ms)
 ![Alt text](/images/mongodb.png?raw=true "Mongo DB metrics")
 ## NGINX metrics
 ![Alt text](/images/nginx.png?raw=true "NGINX metrics")
-
+## Elasticsearch Dashboards while benchmarking
+![Alt text](/images/elasticsearch1.png?raw=true "Elasticsearch 1")
+![Alt text](/images/elasticsearch2.png?raw=true "Elasticsearch 2")
 
