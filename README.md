@@ -116,5 +116,11 @@ Percentage of the requests served within a certain time (ms)
 ```
 
 # Grafana Dashboards while benchmarking
+## Spring Boot metrics
+![Alt text](/images/spring-boot-app.png?raw=true "Spring Boot metrics")
+## Mongo DB metrics
+![Alt text](/images/mongodb.png?raw=true "Mongo DB metrics")
+## NGINX metrics
+![Alt text](/images/nginx.png?raw=true "NGINX metrics")
 
 
