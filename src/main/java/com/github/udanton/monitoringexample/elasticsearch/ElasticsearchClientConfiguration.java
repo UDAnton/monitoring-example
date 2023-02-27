@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ElasticsearchClientConfiguration {
 
-    @Value("${elasticsearch.host")
+    @Value("${elasticsearch.host}")
     private String host;
-    @Value("${elasticsearch.port")
+    @Value("${elasticsearch.port}")
     private int port;
 
     @Bean
